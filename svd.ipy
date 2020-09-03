@@ -1,0 +1,418 @@
+# coding: utf-8
+
+# <codecell>
+import numpy as np
+from numpy.linalg import svd, matrix_rank,norm
+import scipy
+import pandas as pd
+import matplotlib.pyplot as plt
+from IPython import get_ipython
+from util import (
+    svdcomp,
+    nextplot,
+    plot_matrix,
+    plot_xy,
+    plot_cov,
+    match_categories,
+)  # see util.py
+from sklearn.cluster import KMeans
+
+get_ipython().magic("matplotlib")
+
+# <markdowncell>
+# # 1 Intuition on SVD
+
+# <codecell>
+M1 = np.array(
+    [
+        [1, 1, 1, 0, 0],
+        [1, 1, 1, 0, 0],
+        [1, 1, 1, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+    ]
+)
+
+M2 = np.array(
+    [
+        [0, 0, 0, 0, 0],
+        [0, 2, 1, 2, 0],
+        [0, 2, 1, 2, 0],
+        [0, 2, 1, 2, 0],
+        [0, 0, 0, 0, 0],
+    ]
+)
+
+M3 = np.array([[0, 0, 0, 0], [0, 1, 1, 1], [0, 1, 1, 1], [0, 1, 1, 1], [0, 1, 1, 1]])
+
+M4 = np.array(
+    [
+        [1, 1, 1, 0, 0],
+        [1, 1, 1, 0, 0],
+        [1, 1, 1, 0, 0],
+        [0, 0, 0, 1, 1],
+        [0, 0, 0, 1, 1],
+    ]
+)
+
+M5 = np.array(
+    [
+        [1, 1, 1, 0, 0],
+        [1, 1, 1, 0, 0],
+        [1, 1, 1, 1, 1],
+        [0, 0, 1, 1, 1],
+        [0, 0, 1, 1, 1],
+    ]
+)
+
+M6 = np.array(
+    [
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1],
+        [1, 1, 0, 1, 1],
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1],
+    ]
+)
+
+
+# <markdowncell>
+# ## 1a
+
+# <codecell>
+# YOUR PART
+
+# <markdowncell>
+# ## 1b
+
+# <codecell>
+# YOUR PART
+#Matrix M1
+r = np.linalg.matrix_rank(M1)
+u,s,vt = svd(M1,full_matrices = False)
+Xk = u[:,:1] @ np.diag(s[:1]) @ vt[:1,:]
+
+#Matrix M2
+r = np.linalg.matrix_rank(M2)
+u,s,vt = svd(M2,full_matrices = False)
+Xk = u[:,:1] @ np.diag(s[:1]) @ vt[:1,:]
+
+#Matrix M3
+r = np.linalg.matrix_rank(M3)
+u,s,vt = svd(M3,full_matrices = False)
+Xk = u[:,:1] @ np.diag(s[:1]) @ vt[:1,:]
+
+#Matrix M4
+r = np.linalg.matrix_rank(M4)
+u,s,vt = svd(M4,full_matrices = False)
+Xk = u[:,:1] @ np.diag(s[:1]) @ vt[:1,:]
+
+#Matrix M5
+r = np.linalg.matrix_rank(M5)
+u,s,vt = svd(M5,full_matrices = False)
+Xk = u[:,:1] @ np.diag(s[:1]) @ vt[:1,:]
+
+#Matrix M6
+r = np.linalg.matrix_rank(M6)
+u,s,vt = svd(M6,full_matrices = False)
+Xk = u[:,:1] @ np.diag(s[:1]) @ vt[:1,:]
+
+# <markdowncell>
+# ## 1c
+
+# <codecell>
+# You can use the functions svdcomp and plot_matrix from util.py
+# YOUR PART
+Xk = svdcomp(M1, range(1))
+Xk = svdcomp(M2, range(1))
+Xk = svdcomp(M3, range(1))
+Xk = svdcomp(M4, range(1))
+Xk = svdcomp(M5, range(1))
+Xk = svdcomp(M6, range(1))
+
+# <markdowncell>
+# ## 1d
+
+# <codecell>
+# Another method to compute the rank is matrix_rank.
+# YOUR PART
+
+# <markdowncell>
+# # 2 The SVD on Weather Data
+
+# <codecell>
+# Load the data
+climate = pd.read_csv("data/worldclim.csv")
+coord = pd.read_csv("data/worldclim_coordinates.csv")
+lon = coord["lon"]
+lat = coord["lat"]
+
+# <codecell>
+# Plot the coordinates
+plot_xy(lon, lat)
+
+
+# <markdowncell>
+# ## 2a
+# <codecell>
+# YOUR PART
+# Center the data (i.e., substract the column mean from each column). Store the result
+# in X.
+X = (climate - climate.mean())/climate.std(ddof=0)
+# <codecell>
+# Plot histograms of attributes
+nextplot()
+climate.hist(ax=plt.gca())
+nextplot()
+climate.hist(column = climate.columns[[0,12,24,36]])
+plt.savefig('2a1.png')
+
+nextplot()
+X.hist(ax=plt.gca())
+X.hist(column = X.columns[[0,12,24,36]])
+plt.savefig('2a2.png')
+
+# <markdowncell>
+# ## 2b
+
+# <codecell>
+# Compute the SVD of the normalized climate data and store it in variables U,s,Vt. What
+# is the rank of the data?
+# YOUR PART
+U,s,Vt = svd(X)
+r = np.linalg.matrix_rank(X)
+
+plot_matrix(np.diag(s))
+
+# <markdowncell>
+# ## 2c
+
+# <codecell>
+# Here is an example plot.
+plot_xy(lon, lat, U[:, 0])
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.suptitle('colour coding based on U1')
+plt.savefig('2c1.png')
+
+plot_xy(lon, lat, U[:, 1])
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.suptitle('colour coding based on U2')
+plt.savefig('2c2.png')
+
+plot_xy(lon, lat, U[:, 2])
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.suptitle('colour coding based on U3')
+plt.savefig('2c3.png')
+
+plot_xy(lon, lat, U[:, 3])
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.suptitle('colour coding based on U4')
+plt.savefig('2c4.png')
+
+plot_xy(lon, lat, U[:, 4])
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.suptitle('colour coding based on U5')
+plt.savefig('2c5.png')
+
+plot_xy(lon, lat, X.iloc[:, 24])
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.suptitle('Average temperature variation')
+plt.savefig('2c6.png')
+
+plot_xy(lon, lat, X.iloc[:, 36])
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.suptitle('Average rainfall variation')
+plt.savefig('2c7.png')
+
+
+# <codecell>
+# For interpretation, it may also help to look at the other component matrices and
+# perhaps use other plot functions (e.g., plot_matrix).
+# YOUR PART
+
+# <markdowncell>
+# ## 2d
+
+# <codecell>
+# Here is an example.
+plot_xy(U[:, 0], U[:, 1], lat - np.mean(lat))
+plt.xlabel('U1')
+plt.ylabel('U2')
+plt.suptitle('colour coding : variation in latitude')
+plt.savefig('2d1.png')
+
+plot_xy(U[:, 0], U[:, 1], lon - np.mean(lon))
+plt.xlabel('U1')
+plt.ylabel('U2')
+plt.suptitle('colour coding : variation in longitude')
+plt.savefig('2d2.png')
+
+
+# <markdowncell>
+# ## 2e
+
+# <codecell>
+# 2e(i) Guttman-Kaiser
+# YOUR PART
+np.sum(s>1)
+
+# <codecell>
+# 2e(ii) 90% squared Frobenius norm
+# YOUR PART
+diagsq = s*s
+threshold = 0.9*np.sum(diagsq)
+sum_ = 0
+index = 0
+while(sum_< threshold):
+    sum_ += diagsq[index]
+    index += 1
+    
+
+
+# <codecell>
+# 2e(iii) scree test
+# YOUR PART
+plt.plot(diagsq)
+plt.scatter(range(len(diagsq)),diagsq)
+plt.xlabel('index')
+plt.ylabel('squared singular value')
+plt.savefig('2e1.png')
+
+    
+    
+# <codecell>
+# 2e(iv) entropy
+# YOUR PART
+dim = min(len(U),len(Vt))
+fk = diagsq/np.sum(diagsq)
+E = (-1/np.log(dim))*np.sum(fk*np.log(fk))
+
+sum_ = 0
+index = 0
+while(sum_< E):
+    sum_ += fk[index]
+    index += 1
+
+
+
+
+# <codecell>
+# 2e(v) random flips
+# Random sign matrix: np.random.choice([-1,1], X.shape)
+# YOUR PART
+
+rand = np.random.choice([-1,1], X.shape)
+S = np.diag(s)
+result = np.zeros(48)
+for k in range(0,48):   
+    Xk = svdcomp(X,range(k))
+    
+    res = X-Xk
+    res_hat = res*rand
+    
+    result[k] = (np.linalg.norm(res,ord= 2) - np.linalg.norm(res_hat,ord= 2))/np.linalg.norm(res,ord = 'fro')
+   
+plt.plot(result)
+plt.xlabel('size-k truncation')
+plt.ylabel('Difference after random flip')
+plt.savefig('2e2.png')
+
+# <codecell>
+# 2e What, if any, of these would be your choice?
+# YOUR PART
+
+# <markdowncell>
+# ## 2f
+
+# <codecell>
+# Here is the empty plot that you need to fill (one line per choice of k: RSME between
+# original X and the reconstruction from size-k SVD of noisy versions)
+# YOUR PART
+    
+def rmse(A,A_hat):
+       return (1/np.sqrt(A.shape[0]*A.shape[1]))*(np.linalg.norm(A-A_hat,ord = 'fro'))
+   
+ks = [1,2,5,10,48]
+eps = [0,0.5,1,1.5,2]
+
+rmse_result = np.zeros([5,5])
+nextplot()
+i= 0
+for k in ks:
+    j = 0
+    for epsilon in eps:
+        X_noise = X + np.random.randn(*X.shape) * epsilon
+        rmse_result[i][j] = rmse(X,svdcomp(X_noise,range(k)))
+        j+=1
+    plt.plot(np.arange(0,2.5,0.5),rmse_result[i],label='k ={}'.format(k))
+    i+=1
+    
+plt.legend()
+plt.xlabel(r"Noise level ($\epsilon$)")
+plt.ylabel("Reconstruction RMSE vs. original data")
+plt.savefig('2f.png')
+
+
+
+# <markdowncell>
+# # 3 SVD and k-means
+
+# <codecell>
+# Cluster the normalized climate data into 5 clusters using k-means and store
+# the vector giving the cluster labels for each location.
+X_clusters = KMeans(5).fit(X).labels_
+
+# <markdowncell>
+# ## 3a
+
+# <codecell>
+# Plot the results to the map: use the cluster labels to give the color to each
+# point.
+plot_xy(lon, lat, X_clusters)
+plt.xlabel('Longitude')
+plt.ylabel('Latitude')
+plt.savefig('3a.png')
+
+# <markdowncell>
+# ## 3b
+
+# <codecell>
+# YOUR PART HERE
+plot_xy(U[:,0], U[:,1], X_clusters)
+plt.xlabel("U1")
+plt.ylabel("U2")
+plt.savefig('3b.png')
+ 
+# <markdowncell>
+# ## 3c
+
+# <codecell>
+# Compute the PCA scores, store in Z (of shape N x k)
+#k = 2
+# YOUR PART HERE
+for k in [1,2,3]:
+    Xk = svdcomp(X, components=range(k))
+    U,s,Vt = svd(X)
+    #Z = U*S = U*S*Vt*V
+    Z = np.matmul(Xk,np.transpose(Vt))    
+    # <codecell>
+    # cluster and visualize
+    Z_clusters = KMeans(5).fit(Z).labels_
+    # match clusters as well as possible (try without)
+    Z_clusters = match_categories(X_clusters, Z_clusters)
+    nextplot()
+    axs = plt.gcf().subplots(1, 2)
+    plot_xy(lon, lat, X_clusters, axis=axs[0])
+    plot_xy(lon, lat, Z_clusters, axis=axs[1])
+    plt.savefig('3c{}.png'.format(k))
+
+
+
+
